@@ -1,3 +1,11 @@
+Status
+======
+
+NOT READY FOR GENERAL USAGE :)
+
+Description
+===========
+
 Simple script to upload files to [Flickr](http://flickr.com):
 
     flickr-upload -k <api key> -s <api secret> [-s <set name>] <file glob>
