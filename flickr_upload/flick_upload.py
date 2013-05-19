@@ -5,6 +5,7 @@
 
 from __future__ import absolute_import
 import argparse
+import glob
 import logging
 import os
 import sys
@@ -68,6 +69,22 @@ def upload_photo(fname):
     return photo
 
 
+def upload_files(files):
+    """
+    Upload a list of files or file globs to Flickr
+
+    @oaram file: list(str), list of file (globs)
+    return: list(flickr_api.Photo),
+    """
+    ret = []
+    for entry in files:
+        for fname in glob.glob(entry):
+            photo = upload_photo(fname)
+            ret.append(photo)
+            print('Uploaded photo to: {0}'.format(photo.getPageUrl()))
+    return ret
+
+
 def main():
     parser = argparse.ArgumentParser('Download a Flickr Set')
     parser.add_argument('-k', '--api_key', type=str, required=True,
@@ -76,13 +93,16 @@ def main():
                         help='Flickr API secret')
     parser.add_argument('-d', '--debug', default=False, action='store_true',
                         help='turn on debugging')
+    parser.add_argument('file', nargs='+',
+                        help='file(s) to upload')
 
     args = parser.parse_args()
 
     logging.basicConfig(level=logging.DEBUG if args.debug else logging.INFO)
+    # TODO: save keys in file too, and share with download tool
     init(args.api_key, args.api_secret)
-    photo = upload_photo('test.jpg')
-    print('Uploaded photo to: {0}'.format(photo.getPageUrl()))
+    upload_files(args.file)
+
 
 
 if __name__ == '__main__':
