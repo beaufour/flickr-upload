@@ -1,6 +1,6 @@
 Simple script to upload files to [Flickr](http://flickr.com):
 
-    flickr_download -k <api key> -s <api secret> [-s <set name>] <file glob>
+    flickr-upload -k <api key> -s <api secret> [-s <set name>] <file glob>
 
 Get your [Flickr API key](http://www.flickr.com/services/api/).
 
