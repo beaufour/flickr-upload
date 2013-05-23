@@ -5,6 +5,7 @@
 
 from __future__ import absolute_import
 import argparse
+import csv
 import glob
 import logging
 import os
@@ -55,33 +56,52 @@ def init(key, secret):
     set_auth_handler(handler)
 
 
-def upload_photo(fname):
+def upload_photo(fname, title=None):
     """
     Uploads the given file to Flickr
 
     @param fname: str, path to file
-    @return: flickr_api.Photo, uploaded photo object
+    @param title: str|None, file title
+    @return: Flickr.Photo, uploaded photo object
     """
     # TODO: figure out params
     logging.debug('Uploading: {0}'.format(fname))
-    photo = Flickr.Upload.upload(photo_file=fname, is_public=0)
+    photo = Flickr.Upload.upload(photo_file=fname, is_public=0, title=title)
     logging.debug('Uploaded: {0}'.format(photo))
     return photo
 
 
-def upload_files(files):
+def upload_files(files, descriptions=None):
     """
     Upload a list of files or file globs to Flickr
 
-    @oaram file: list(str), list of file (globs)
-    return: list(flickr_api.Photo),
+    @param file: list(str), list of file (globs)
+    @param descriptions: object|None, filename -> description
+    return: list(Flickr.Photo),
     """
     ret = []
+    descriptions = descriptions or {}
     for entry in files:
         for fname in glob.glob(entry):
-            photo = upload_photo(fname)
+            photo = upload_photo(fname, title=descriptions.get(os.path.basename(fname)))
             ret.append(photo)
             print('Uploaded photo to: {0}'.format(photo.getPageUrl()))
+    return ret
+
+
+def load_description_file(fname):
+    """
+    TODO: dox
+    """
+    ret = {}
+    with open(fname, 'rb') as csvfile:
+        header = csvfile.readline().strip()
+        ret['set_name'] = header
+        reader = csv.reader(csvfile, delimiter=';')
+        ret['photos'] = {}
+        for row in reader:
+            ret['photos'][row[0]] = row[1]
+
     return ret
 
 
@@ -99,10 +119,22 @@ def main():
     args = parser.parse_args()
 
     logging.basicConfig(level=logging.DEBUG if args.debug else logging.INFO)
-    # TODO: save keys in file too, and share with download tool
-    init(args.api_key, args.api_secret)
-    upload_files(args.file)
 
+    # TODO: save keys in file too, and share with download tool
+
+    # TODO: take file from cmdline
+    descr = load_description_file('test/files.txt')
+
+    init(args.api_key, args.api_secret)
+    photos = upload_files(args.file, descriptions=descr['photos'])
+
+    set_name = descr.get('set_name')
+    if set_name:
+        logging.debug('Creating set: {0}'.format(set_name))
+        photoset = Flickr.Photoset.create(primary_photo=photos[0], title=set_name)
+        for photo in photos[1:]:
+            photoset.addPhoto(photo_id=photo.id)
+        # TODO: find/implement .getPageUrl?
 
 
 if __name__ == '__main__':
