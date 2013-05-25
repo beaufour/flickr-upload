@@ -64,7 +64,7 @@ def upload_photo(fname, title=None):
     @param title: str|None, file title
     @return: Flickr.Photo, uploaded photo object
     """
-    # TODO: figure out params
+    # TODO: add support for private/public
     logging.debug('Uploading: {0}'.format(fname))
     photo = Flickr.Upload.upload(photo_file=fname, is_public=0, title=title)
     logging.debug('Uploaded: {0}'.format(photo))
@@ -91,8 +91,12 @@ def upload_files(files, descriptions=None):
 
 def load_description_file(fname):
     """
-    TODO: dox
+    Load ana parse the photo descrition file.
+
+    @param fname: str, path to file
+    @return: dict, { 'set_name': str, 'photos': dict }
     """
+    logging.info('Loading descriptions from: {0}'.format(fname))
     ret = {}
     with open(fname, 'rb') as csvfile:
         header = csvfile.readline().strip()
@@ -113,6 +117,8 @@ def main():
                         help='Flickr API secret')
     parser.add_argument('-d', '--debug', default=False, action='store_true',
                         help='turn on debugging')
+    parser.add_argument('-f', '--description_file', type=str,
+                        help='optional description file with photo titles')
     parser.add_argument('file', nargs='+',
                         help='file(s) to upload')
 
@@ -122,11 +128,12 @@ def main():
 
     # TODO: save keys in file too, and share with download tool
 
-    # TODO: take file from cmdline
-    descr = load_description_file('test/files.txt')
+    descr = None
+    if args.description_file:
+        descr = load_description_file(args.description_file)
 
     init(args.api_key, args.api_secret)
-    photos = upload_files(args.file, descriptions=descr['photos'])
+    photos = upload_files(args.file, descriptions=descr.get('photos'))
 
     set_name = descr.get('set_name')
     if set_name:
