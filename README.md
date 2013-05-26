@@ -17,3 +17,4 @@ Requirements
 
 * [argparse](http://docs.python.org/2.7/library/argparse.html) (Python 2.7+)
 * [Python Flickr API](https://github.com/alexis-mignon/python-flickr-api/)
+* [phpserialize](https://pypi.python.org/pypi/phpserialize)
