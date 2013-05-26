@@ -1,3 +1,10 @@
+#!/usr/bin/env python
+#
+# Util to upload Gallery Project files to Flickr
+#
+# http://galleryproject.org/
+#
+
 from __future__ import absolute_import
 import argparse
 from collections import OrderedDict

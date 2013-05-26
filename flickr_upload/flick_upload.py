@@ -11,8 +11,6 @@ import logging
 import os
 import sys
 
-import flickr_api as Flickr
-
 from lib import add_common_options
 from lib import create_set
 from lib import init
